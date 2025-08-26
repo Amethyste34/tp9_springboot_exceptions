@@ -3,6 +3,7 @@ package app.controllers;
 import app.documentation.VilleApi;
 import app.entities.Departement;
 import app.entities.Ville;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,10 @@ import org.springframework.web.server.ResponseStatusException;
 import app.services.impl.DepartementServiceImpl;
 import app.services.impl.VilleServiceImpl;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -123,4 +128,51 @@ public class VilleController implements VilleApi {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Département introuvable"));
         return villeService.findTopNByDepartement(dep, n);
     }
+
+    /**
+     * Exporte toutes les villes dont la population municipale est supérieure
+     * ou égale à la valeur du paramètre {@code min}, au format CSV.
+     *
+     * <p>Le fichier CSV généré contient les colonnes suivantes&nbsp;:
+     * <ul>
+     *   <li>Nom de la ville</li>
+     *   <li>Population municipale</li>
+     *   <li>Code du département</li>
+     *   <li>Nom du département</li>
+     * </ul>
+     *
+     * <p>L'encodage utilisé est <b>UTF-8 avec BOM</b> afin d'assurer une
+     * compatibilité optimale avec Excel (Windows) et les autres tableurs
+     * (LibreOffice, Google Sheets, etc.).</p>
+     *
+     * @param min seuil minimum de population municipale. Seules les villes ayant
+     *            une population supérieure ou égale à ce seuil sont exportées.
+     * @param response objet {@link HttpServletResponse} utilisé pour écrire
+     *                 le flux CSV directement dans la réponse HTTP.
+     * @throws IOException si une erreur survient lors de l'écriture du flux.
+     */
+    @GetMapping("/export/csv/population/min/{min}")
+    public void exportVillesToCsv(@PathVariable int min,
+                                  HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=villes.csv");
+
+        // Ajout du BOM pour Excel
+        OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8);
+        writer.write('\uFEFF');
+
+        writer.write("Nom de la ville;Population;Code département;Nom département\n");
+
+        List<Ville> villes = villeService.findByPopulationMin(min);
+        for (Ville ville : villes) {
+            writer.write(ville.getNom() + ";" +
+                    ville.getPopulationTotale() + ";" +
+                    ville.getDepartement().getCode() + ";" +
+                    ville.getDepartement().getNom() + "\n");
+        }
+
+        writer.flush();
+        writer.close();
+    }
+
 }
