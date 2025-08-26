@@ -1,6 +1,7 @@
 package app.services;
 
 import app.entities.Departement;
+import app.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,25 +54,29 @@ public class DepartementService {
 
     /**
      * Met à jour un département existant (par code).
-     * Si le département n'existe pas, une IllegalArgumentException est levée.
+     * Si le département n'existe pas, une NotFoundException est levée.
      *
      * @param code        code du département à mettre à jour.
      * @param departement données à appliquer (le code fourni fait foi).
      * @return département mis à jour.
      */
     public Departement updateDepartement(String code, Departement departement) {
-        Departement existDep = departementRepository.findByCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Département inexistant : " + code));
+        Departement existDep = departementRepository.findById(code)
+                .orElseThrow(() -> new NotFoundException("Département inexistant : " + code));
         existDep.setNom(departement.getNom());
         return departementRepository.save(existDep);
     }
 
     /**
      * Supprime un département par son code.
+     * Si le département n'existe pas, une NotFoundException est levée.
      *
      * @param code code du département.
      */
     public void deleteDepartement(String code) {
+        if (!departementRepository.existsById(code)) {
+            throw new NotFoundException("Impossible de supprimer : département inexistant " + code);
+        }
         departementRepository.deleteById(code);
     }
 }

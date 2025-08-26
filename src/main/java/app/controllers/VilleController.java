@@ -35,8 +35,8 @@ public class VilleController {
         return villeService.getAll(page, size);
     }
 
-    /** Récupère une ville par id. */
-    @GetMapping("/{id}")
+    /** Récupère une ville par id (uniquement chiffres). */
+    @GetMapping("/{id:[0-9]+}")
     public Ville getVilleById(@PathVariable Long id) {
         return villeService.getById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ville introuvable"));
