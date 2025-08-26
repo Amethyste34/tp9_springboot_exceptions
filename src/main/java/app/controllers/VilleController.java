@@ -1,5 +1,6 @@
 package app.controllers;
 
+import app.documentation.VilleApi;
 import app.entities.Departement;
 import app.entities.Ville;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/villes")
-public class VilleController {
+public class VilleController implements VilleApi {
 
     @Autowired
     private VilleService villeService;
