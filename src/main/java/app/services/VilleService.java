@@ -3,131 +3,33 @@ package app.services;
 import app.entities.Departement;
 import app.entities.Ville;
 import app.exceptions.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import app.repository.VilleRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service métier pour la gestion des entités {@link Ville}.
- * <p>
- * Fournit des opérations de consultation, de recherche et de CRUD
- * en s'appuyant sur {@link VilleRepository}.
- */
-@Service
-@Transactional
-public class VilleService {
+public interface VilleService {
+    Page<Ville> getAll(int page, int size);
 
-    @Autowired
-    private VilleRepository villeRepository;
+    Optional<Ville> getById(Long id);
 
-    @Autowired
-    private DepartementService departementService;
+    List<Ville> findByNomExact(String nom) throws NotFoundException;
 
-    // ------------------- CRUD -------------------
+    Ville addVille(Ville ville) throws NotFoundException;
 
-    public Page<Ville> getAll(int page, int size) {
-        return villeRepository.findAll(PageRequest.of(page, size));
-    }
+    Ville updateVille(Long id, Ville ville) throws NotFoundException;
 
-    public Optional<Ville> getById(Long id) {
-        return villeRepository.findById(id);
-    }
+    void deleteVille(Long id) throws NotFoundException;
 
-    public List<Ville> findByNomExact(String nom) throws NotFoundException {
-        List<Ville> villes = villeRepository.findByNomIgnoreCase(nom);
-        if (villes.isEmpty()) {
-            throw new NotFoundException("Ville non trouvée avec le nom : " + nom);
-        }
-        return villes;
-    }
+    List<Ville> findByNomPrefix(String prefix) throws NotFoundException;
 
-    public Ville addVille(Ville ville) throws NotFoundException {
-        Departement dep = ville.getDepartement();
-        if (dep == null || dep.getCode() == null) {
-            throw new NotFoundException("Département manquant pour la ville.");
-        }
-        Departement existDep = departementService.findByCode(dep.getCode())
-                .orElseThrow(() -> new NotFoundException("Département inexistant : " + dep.getCode()));
-        ville.setDepartement(existDep);
-        return villeRepository.save(ville);
-    }
+    List<Ville> findByPopulationMin(int min) throws NotFoundException;
 
-    public Ville updateVille(Long id, Ville ville) throws NotFoundException {
-        if (!villeRepository.existsById(id)) {
-            throw new NotFoundException("Ville introuvable: id=" + id);
-        }
-        Departement dep = ville.getDepartement();
-        if (dep == null || dep.getCode() == null) {
-            throw new NotFoundException("Département manquant pour la ville.");
-        }
-        Departement existDep = departementService.findByCode(dep.getCode())
-                .orElseThrow(() -> new NotFoundException("Département inexistant : " + dep.getCode()));
-        ville.setDepartement(existDep);
-        ville.setId(id);
-        return villeRepository.save(ville);
-    }
+    List<Ville> findByPopulationBetween(int min, int max) throws NotFoundException;
 
-    public void deleteVille(Long id) throws NotFoundException {
-        if (!villeRepository.existsById(id)) {
-            throw new NotFoundException("Impossible de supprimer : ville inexistante avec id=" + id);
-        }
-        villeRepository.deleteById(id);
-    }
+    List<Ville> findByDepartementAndPopulationMin(Departement departement, int min) throws NotFoundException;
 
-    // ------------------- Recherches spécifiques -------------------
+    List<Ville> findByDepartementAndPopulationBetween(Departement departement, int min, int max) throws NotFoundException;
 
-    public List<Ville> findByNomPrefix(String prefix) throws NotFoundException {
-        List<Ville> villes = villeRepository.findByNomStartingWithIgnoreCase(prefix);
-        if (villes.isEmpty()) {
-            throw new NotFoundException("Aucune ville dont le nom commence par " + prefix + " n’a été trouvée");
-        }
-        return villes;
-    }
-
-    public List<Ville> findByPopulationMin(int min) throws NotFoundException {
-        List<Ville> villes = villeRepository.findByPopulationTotaleGreaterThanOrderByPopulationTotaleDesc(min);
-        if (villes.isEmpty()) {
-            throw new NotFoundException("Aucune ville n’a une population supérieure à " + min);
-        }
-        return villes;
-    }
-
-    public List<Ville> findByPopulationBetween(int min, int max) throws NotFoundException {
-        List<Ville> villes = villeRepository.findByPopulationTotaleBetweenOrderByPopulationTotaleDesc(min, max);
-        if (villes.isEmpty()) {
-            throw new NotFoundException("Aucune ville n’a une population comprise entre " + min + " et " + max);
-        }
-        return villes;
-    }
-
-    public List<Ville> findByDepartementAndPopulationMin(Departement departement, int min) throws NotFoundException {
-        List<Ville> villes = villeRepository.findByDepartementAndPopulationTotaleGreaterThanOrderByPopulationTotaleDesc(departement, min);
-        if (villes.isEmpty()) {
-            throw new NotFoundException("Aucune ville n’a une population supérieure à " + min + " dans le département " + departement.getCode());
-        }
-        return villes;
-    }
-
-    public List<Ville> findByDepartementAndPopulationBetween(Departement departement, int min, int max) throws NotFoundException {
-        List<Ville> villes = villeRepository.findByDepartementAndPopulationTotaleBetweenOrderByPopulationTotaleDesc(departement, min, max);
-        if (villes.isEmpty()) {
-            throw new NotFoundException("Aucune ville n’a une population comprise entre " + min + " et " + max +
-                    " dans le département " + departement.getCode());
-        }
-        return villes;
-    }
-
-    public List<Ville> findTopNByDepartement(Departement departement, int n) throws NotFoundException {
-        List<Ville> villes = villeRepository.findByDepartementOrderByPopulationTotaleDesc(departement, PageRequest.of(0, n));
-        if (villes.isEmpty()) {
-            throw new NotFoundException("Aucune ville trouvée dans le département " + departement.getCode());
-        }
-        return villes;
-    }
+    List<Ville> findTopNByDepartement(Departement departement, int n) throws NotFoundException;
 }

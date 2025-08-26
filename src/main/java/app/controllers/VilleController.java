@@ -8,8 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import app.services.DepartementService;
-import app.services.VilleService;
+import app.services.impl.DepartementServiceImpl;
+import app.services.impl.VilleServiceImpl;
 
 import java.util.List;
 
@@ -24,10 +24,10 @@ import java.util.List;
 public class VilleController implements VilleApi {
 
     @Autowired
-    private VilleService villeService;
+    private VilleServiceImpl villeService;
 
     @Autowired
-    private DepartementService departementService;
+    private DepartementServiceImpl departementService;
 
     /** Récupère toutes les villes paginées. */
     @GetMapping

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import app.services.DepartementService;
+import app.services.impl.DepartementServiceImpl;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
 public class DepartementController {
 
     @Autowired
-    private DepartementService departementService;
+    private DepartementServiceImpl departementService;
 
     /** Liste de tous les départements. */
     @GetMapping
