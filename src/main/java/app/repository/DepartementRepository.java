@@ -26,4 +26,7 @@ public interface DepartementRepository extends JpaRepository<Departement, String
      */
     Optional<Departement> findByCode(String code);
 
+
+    boolean existsByCode(String code);
+
 }

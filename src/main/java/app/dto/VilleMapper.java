@@ -17,9 +17,11 @@ public class VilleMapper {
     public static Ville toEntity(VilleDto dto, Departement dep) {
         Ville v = new Ville();
         v.setId(dto.getId());
+        v.setCode(dto.getCode());
         v.setNom(dto.getNom());
-        v.setPopulationMunicipale(dto.getPopulationMunicipale());
         v.setPopulationTotale(dto.getPopulationTotale());
+        // par cohérence, populationMunicipale = populationTotale
+        v.setPopulationMunicipale(dto.getPopulationTotale());
         v.setDepartement(dep);
         return v;
     }
@@ -28,8 +30,9 @@ public class VilleMapper {
         VilleDto dto = new VilleDto();
         dto.setId(v.getId());
         dto.setNom(v.getNom());
-        dto.setPopulationMunicipale(v.getPopulationMunicipale());
+        dto.setCode(v.getCode());
         dto.setPopulationTotale(v.getPopulationTotale());
+        dto.setPopulationMunicipale(v.getPopulationMunicipale());
         dto.setCodeDepartement(v.getDepartement().getCode());
         return dto;
     }

@@ -21,6 +21,9 @@ public class Ville {
     @Column(nullable = false)
     private String nom;
 
+    @Column(nullable = false, unique = true)
+    private String code; // ✅ Code INSEE de la ville
+
     /** Population municipale */
     @Column(nullable = false)
     private int populationMunicipale;
@@ -49,6 +52,10 @@ public class Ville {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public String getCode() { return code; }
+
+    public void setCode(String code) { this.code = code; }
 
     public String getNom() {
         return nom;

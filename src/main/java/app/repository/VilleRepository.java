@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository Spring Data JPA pour la gestion des entités {@link Ville}.
@@ -16,6 +17,20 @@ import java.util.List;
  * fournies par {@link JpaRepository}.
  */
 public interface VilleRepository extends JpaRepository<Ville, Long> {
+
+    /**
+     * Vérifie si une ville existe déjà en base avec le code donné.
+     * @param code code INSEE de la ville
+     * @return true si existe, false sinon
+     */
+    boolean existsByCode(String code);
+
+    /**
+     * Cherche une ville par son code INSEE.
+     * @param code code INSEE de la ville
+     * @return Ville si trouvée, sinon null
+     */
+    Optional<Ville> findByCode(String code);
 
     /**
      * Recherche d'une ville par son nom
